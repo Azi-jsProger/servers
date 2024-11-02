@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const serverless = require("serverless-http"); // Импорт serverless-http
 require("dotenv").config();
 
 const app = express();
@@ -20,7 +21,10 @@ app.use(cors({
 app.use(bodyParser.json());
 
 // Подключение к MongoDB
-mongoose.connect(process.env.MONGO_URL)
+mongoose.connect(process.env.MONGO_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
 .then(() => {
   console.log("Connected to MongoDB");
 })
@@ -93,12 +97,5 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-// Если вы хотите локально запустить сервер
-if (process.env.NODE_ENV !== "serverless") {
-  app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
-  });
-}
-
 // Экспортируем приложение для использования в serverless
-module.exports = app;
+module.exports.handler = serverless(app);
